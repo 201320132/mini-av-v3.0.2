@@ -1,0 +1,12 @@
+name: build-exe
+on: [push, workflow_dispatch]
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: cargo build --release
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mini-av
+          path: target/release/mini-av.exe

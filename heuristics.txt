@@ -1,0 +1,108 @@
+# Mini AV heuristics file (version 3)
+#
+# This file ships inside the program. You can override or extend it by placing a file with the same
+# name next to mini-av.exe or in %APPDATA%\MiniAV\heuristics.txt.
+#
+# Format:
+#   [section]    replaces the built-in list of that name
+#   [section+]   appends to the built-in list
+#   Sections ending in _ext take space-separated extensions; every other section takes one item per line.
+#   Everything is case-insensitive. Lines starting with # are comments.
+#
+# Safety: rules can only make the scanner look at MORE things. The Windows folder is always protected
+# and Program Files is never modified by heuristic (yellow/red) detections, whatever this file says.
+
+[settings]
+version=2026.11.11
+script_threshold=3
+
+[doc_ext]
+doc docx pdf jpg jpeg png gif bmp txt xls xlsx ppt pptx mp3 mp4 avi mkv zip rar 7z rtf htm html
+
+[exe_ext]
+exe scr com pif bat cmd
+
+[script_ext]
+vbs vbe jse wsf wsh hta js ps1
+
+[hash_ext]
+exe dll scr com sys pif jar bat cmd vbs js ps1 hta msi
+
+[usb_script_ext]
+vbs vbe jse wsf wsh hta scr pif
+
+[launchers]
+cmd.exe
+wscript
+cscript
+mshta
+powershell
+rundll32
+regsvr32
+
+[start_hints]
+/c start
+&start
+& start
+.vbs
+.vbe
+recycler
+recycled
+%cd%
+
+[system_names]
+system volume information
+$recycle.bin
+recycler
+recycled
+found.000
+desktop.ini
+thumbs.db
+autorun.inf
+boot
+bootmgr
+efi
+msocache
+$winreagent
+
+[hosts_keys]
+windowsupdate
+update.microsoft
+defender
+kaspersky
+eset.
+avast
+avira
+bitdefender
+malwarebytes
+symantec
+norton
+mcafee
+virustotal
+trendmicro
+sophos
+drweb
+f-secure
+
+# Publishers whose valid digital signature (checked by Windows itself) is trusted completely.
+# Any other validly signed file is only trusted when the detection is "suspicious" (yellow).
+[trusted_publishers]
+microsoft corporation
+microsoft windows
+google llc
+mozilla corporation
+adobe inc.
+intel corporation
+nvidia corporation
+realtek semiconductor
+advanced micro devices
+dell inc.
+hp inc.
+lenovo
+asus
+oracle america
+python software foundation
+videolan
+
+# Extra folders (one per line, full path) that must never be modified. Optional.
+[protected_dirs]

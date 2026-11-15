@@ -1,0 +1,765 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mini AV</title>
+<style>
+:root{
+  --bg:#060912; --text:#e9eef8; --mut:#94a1ba; --dim:#64708a;
+  --glass:rgba(255,255,255,.055); --glass2:rgba(255,255,255,.095); --line:rgba(255,255,255,.12);
+  --a1:#2fe6c6; --a2:#4d8dff; --ok:#3ddc97; --warn:#ffb454; --bad:#ff5d73; --r:18px;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--text);font:14px/1.6 "Segoe UI","Vazirmatn",Tahoma,sans-serif;overflow:hidden;-webkit-font-smoothing:antialiased}
+button,input{font:inherit;color:inherit}
+.bg{position:fixed;inset:0;z-index:0;overflow:hidden;background:radial-gradient(1200px 700px at 80% -10%,#10223a 0%,transparent 60%),#060912}
+.bg i{position:absolute;border-radius:50%;filter:blur(100px);opacity:.5;animation:drift 22s ease-in-out infinite alternate}
+.bg .b1{width:520px;height:520px;background:#12b8a0;top:-160px;inset-inline-start:-120px}
+.bg .b2{width:560px;height:560px;background:#2b5fd9;bottom:-220px;inset-inline-end:-120px;animation-delay:-8s}
+.bg .b3{width:380px;height:380px;background:#6a3fd1;top:38%;inset-inline-start:38%;opacity:.28;animation-delay:-14s}
+@keyframes drift{to{transform:translate(60px,40px) scale(1.12)}}
+.app{position:relative;z-index:1;display:flex;height:100vh;padding:14px;gap:14px}
+.glass{background:var(--glass);border:1px solid var(--line);backdrop-filter:blur(26px) saturate(150%);-webkit-backdrop-filter:blur(26px) saturate(150%);border-radius:var(--r);box-shadow:0 10px 40px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.08)}
+.ic{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.ic.lg{width:28px;height:28px}.ic.sm{width:16px;height:16px}
+
+/* sidebar */
+.side{width:224px;flex:none;display:flex;flex-direction:column;padding:16px 12px;gap:6px}
+.brand{display:flex;align-items:center;gap:10px;padding:4px 8px 16px}
+.brand .logo{width:38px;height:38px;flex:none}
+.brand b{display:block;font-size:16px;letter-spacing:.2px}
+.brand small{display:block;color:var(--mut);font-size:11px;line-height:1.3}
+.nav{display:flex;align-items:center;gap:12px;width:100%;padding:11px 12px;border:1px solid transparent;border-radius:12px;background:none;color:var(--mut);cursor:pointer;text-align:start;transition:.15s}
+.nav:hover{background:var(--glass);color:var(--text)}
+.nav.on{background:linear-gradient(135deg,rgba(47,230,198,.16),rgba(77,141,255,.16));border-color:rgba(120,200,255,.28);color:#fff}
+.nav .badge{margin-inline-start:auto;background:var(--bad);color:#fff;border-radius:99px;font-size:11px;padding:0 7px;min-width:20px;text-align:center}
+.grow{flex:1}
+.seg{display:flex;background:rgba(0,0,0,.25);border:1px solid var(--line);border-radius:12px;padding:3px;gap:3px}
+.seg button{flex:1;border:0;background:none;padding:6px 10px;border-radius:9px;color:var(--mut);cursor:pointer}
+.seg button.on{background:var(--glass2);color:#fff;box-shadow:inset 0 0 0 1px var(--line)}
+.sidefoot{display:flex;flex-direction:column;gap:10px;padding:10px 4px 2px}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:3px 10px;border-radius:99px;background:var(--glass);border:1px solid var(--line);color:var(--mut)}
+.chip.ok{color:var(--ok)}.chip.warn{color:var(--warn)}
+
+/* main */
+main{flex:1;min-width:0;overflow:auto;padding:2px 4px 18px;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.2) transparent}
+.page{display:none;animation:fade .25s ease}.page.on{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}}
+h1{margin:6px 0 4px;font-size:22px}h2{margin:0 0 10px;font-size:16px}
+.sub{color:var(--mut);margin:0 0 16px}
+.card{padding:18px}
+.grid{display:grid;gap:14px}
+.g4{grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+.g3{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.mt{margin-top:14px}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--line);background:var(--glass2);padding:9px 16px;border-radius:12px;cursor:pointer;transition:.15s;white-space:nowrap}
+.btn:hover{background:rgba(255,255,255,.15)}
+.btn:focus-visible,.nav:focus-visible,.seg button:focus-visible,.mode:focus-visible,input:focus-visible{outline:2px solid var(--a1);outline-offset:2px}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.btn.primary{border:0;color:#04141a;font-weight:600;background:linear-gradient(135deg,var(--a1),var(--a2))}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.danger{border:0;color:#fff;font-weight:600;background:linear-gradient(135deg,#ff5d73,#d6204a)}
+.btn.danger:hover{filter:brightness(1.1)}
+.btn.sm{padding:5px 11px;border-radius:10px;font-size:13px}
+.btn.ghost{background:none}
+
+/* hero */
+.hero{display:flex;align-items:center;gap:26px;padding:26px;position:relative;overflow:hidden}
+.ring{position:relative;width:150px;height:150px;flex:none}
+.ring svg.r{width:150px;height:150px;transform:rotate(-90deg)}
+.ring .shield{position:absolute;inset:0;display:grid;place-items:center}
+.ring .shield .ic{width:56px;height:56px;stroke-width:1.6}
+.hero.ok{--c1:var(--a1);--c2:var(--a2)}.hero.warn{--c1:#ffd37a;--c2:#ff9a3d}.hero.bad{--c1:#ff8aa0;--c2:#ff3d63}.hero.unk{--c1:#8fa3c8;--c2:#5d6e94}
+.hero .shield{color:var(--c1);filter:drop-shadow(0 0 14px var(--c2))}
+.hero:after{content:"";position:absolute;width:340px;height:340px;border-radius:50%;inset-inline-end:-90px;top:-120px;background:radial-gradient(circle,var(--c2),transparent 65%);opacity:.22;pointer-events:none}
+.hero h1{font-size:26px;margin:0}
+.hero .acts{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.stat{display:flex;gap:12px;align-items:flex-start}
+.stat .ico{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:var(--glass2);flex:none}
+.stat .ico.ok{color:var(--ok)}.stat .ico.warn{color:var(--warn)}.stat .ico.bad{color:var(--bad)}.stat .ico.unk{color:var(--mut)}
+.stat small{display:block;color:var(--mut)}
+.stat b{font-weight:600}
+
+/* scan page */
+.modes{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.mode{display:flex;flex-direction:column;gap:6px;text-align:start;padding:16px;border-radius:16px;background:var(--glass);border:1px solid var(--line);cursor:pointer;transition:.15s}
+.mode:hover{background:var(--glass2)}
+.mode.on{border-color:rgba(47,230,198,.6);background:linear-gradient(135deg,rgba(47,230,198,.14),rgba(77,141,255,.12));box-shadow:0 0 0 3px rgba(47,230,198,.12)}
+.mode .ic{color:var(--a1)}.mode b{font-size:15px}.mode span{color:var(--mut);font-size:12.5px}
+.opts{display:flex;flex-wrap:wrap;align-items:center;gap:14px;margin-top:14px}
+.sw{display:inline-flex;align-items:center;gap:10px;cursor:pointer;user-select:none}
+.sw input{position:absolute;opacity:0}
+.sw i{width:40px;height:22px;border-radius:99px;background:rgba(255,255,255,.14);position:relative;transition:.2s;flex:none}
+.sw i:after{content:"";position:absolute;top:3px;inset-inline-start:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:.2s}
+.sw input:checked+i{background:linear-gradient(135deg,var(--a1),var(--a2))}
+.sw input:checked+i:after{inset-inline-start:21px}
+.sw input:focus-visible+i{outline:2px solid var(--a1);outline-offset:2px}
+.custom{margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
+.addrow{display:flex;gap:8px;flex-wrap:wrap}
+.addrow input{flex:1;min-width:200px;background:rgba(0,0,0,.28);border:1px solid var(--line);border-radius:12px;padding:9px 12px;direction:ltr;text-align:start}
+.tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.tag{display:inline-flex;align-items:center;gap:8px;background:var(--glass2);border:1px solid var(--line);border-radius:10px;padding:4px 6px 4px 10px;direction:ltr;max-width:100%}
+.tag span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:380px}
+.tag button{border:0;background:none;color:var(--mut);cursor:pointer;display:grid;place-items:center;padding:2px}
+.tag button:hover{color:var(--bad)}
+.drv{cursor:pointer;display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border-radius:10px;background:var(--glass);border:1px solid var(--line)}
+.drv:hover{background:var(--glass2)}.drv small{color:var(--mut)}
+
+.prog{margin-top:14px;display:none}.prog.on{display:block}
+.bar{height:8px;border-radius:99px;background:rgba(255,255,255,.09);overflow:hidden;position:relative}
+.bar i{position:absolute;inset-block:0;width:35%;border-radius:99px;background:linear-gradient(90deg,var(--a1),var(--a2));animation:slide 1.4s ease-in-out infinite}
+.bar.done i{animation:none;width:100%}
+@keyframes slide{0%{inset-inline-start:-35%}100%{inset-inline-start:100%}}
+.phases{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 8px}
+.ph{font-size:12px;padding:2px 10px;border-radius:99px;border:1px solid var(--line);color:var(--dim)}
+.ph.on{color:#04141a;background:linear-gradient(135deg,var(--a1),var(--a2));border:0;font-weight:600}.ph.fin{color:var(--ok)}
+.cur{direction:ltr;text-align:left;color:var(--mut);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-height:19px}
+.bulk{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:10px}
+.bulk .grow{min-width:20px}
+.trow{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:12px 4px;border-top:1px solid var(--line)}
+.trow:first-of-type{border-top:0}
+.trow .nm{font-weight:600;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.trow .ds{color:var(--mut);font-size:12.5px}
+.path{direction:ltr;text-align:left;color:#b9c6e0;font:12px/1.5 Consolas,"Cascadia Mono",monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.trow .acts{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.pill{font-size:11px;padding:1px 9px;border-radius:99px;border:1px solid}
+.pill.high{color:var(--bad);border-color:rgba(255,93,115,.5);background:rgba(255,93,115,.1)}
+.pill.medium{color:var(--warn);border-color:rgba(255,180,84,.5);background:rgba(255,180,84,.1)}
+.pill.info{color:var(--a2);border-color:rgba(77,141,255,.5);background:rgba(77,141,255,.1)}
+.st{font-size:13px}.st.ok{color:var(--ok)}.st.bad{color:var(--bad)}.st.mut{color:var(--mut)}
+.cb{width:18px;height:18px;accent-color:#2fe6c6;cursor:pointer}
+.empty{display:grid;place-items:center;gap:10px;padding:34px 10px;color:var(--mut);text-align:center}
+.empty .ic{width:42px;height:42px;color:var(--ok)}
+
+/* quarantine */
+.qhead{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.qrow{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:12px 4px;border-top:1px solid var(--line)}
+.qrow:first-child{border-top:0}
+.qico{width:38px;height:38px;border-radius:11px;background:rgba(255,93,115,.12);color:var(--bad);display:grid;place-items:center}
+.meta{color:var(--mut);font-size:12px}
+
+/* settings */
+.srow{display:flex;align-items:center;gap:14px;padding:12px 0;border-top:1px solid var(--line);flex-wrap:wrap}
+.srow:first-of-type{border-top:0}
+.srow .tx{flex:1;min-width:220px}.srow .tx small{display:block;color:var(--mut)}
+.mono{font-family:Consolas,monospace;direction:ltr;unicode-bidi:isolate}
+
+/* modal + toast */
+.veil{position:fixed;inset:0;z-index:20;background:rgba(3,6,14,.6);backdrop-filter:blur(6px);display:none;place-items:center;padding:20px}
+.veil.on{display:grid;animation:fade .15s}
+.modal{width:min(480px,100%);padding:24px}
+.modal h2{display:flex;align-items:center;gap:10px;font-size:18px}
+.modal p{color:var(--mut);margin:6px 0 18px}
+.modal .row{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}
+.err{color:var(--bad);font-size:13px;margin:-6px 0 12px}
+#toasts{position:fixed;z-index:30;bottom:20px;inset-inline-start:50%;transform:translateX(-50%);display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none}
+[dir=rtl] #toasts{transform:translateX(50%)}
+.toast{background:rgba(18,26,44,.92);border:1px solid var(--line);padding:10px 18px;border-radius:12px;backdrop-filter:blur(14px);box-shadow:0 8px 30px rgba(0,0,0,.4);animation:fade .2s}
+.toast.bad{border-color:rgba(255,93,115,.6)}.toast.ok{border-color:rgba(61,220,151,.6)}
+
+@media (max-width:980px){
+  .side{width:68px;padding:12px 8px}.brand div,.nav span,.nav .badge,.sidefoot .chip{display:none}
+  .sidefoot .seg{flex-direction:column}.seg button{min-width:0;padding:5px 2px;font-size:11px}.sidefoot{padding-inline:0}.brand{justify-content:center;padding-inline:0}.nav{justify-content:center;padding:12px 0}
+  .hero{flex-direction:column;text-align:center}
+}
+[dir=rtl] .path,[dir=rtl] .cur{text-align:right}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<!-- SVG icon set -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2fe6c6"/><stop offset="1" stop-color="#4d8dff"/></linearGradient>
+  </defs>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 2.6l7.6 2.8v6.1c0 4.6-3.1 8.1-7.6 10-4.5-1.9-7.6-5.4-7.6-10V5.4z"/><path d="M8.6 12.1l2.6 2.6 4.3-4.9"/></symbol>
+  <symbol id="i-shield-x" viewBox="0 0 24 24"><path d="M12 2.6l7.6 2.8v6.1c0 4.6-3.1 8.1-7.6 10-4.5-1.9-7.6-5.4-7.6-10V5.4z"/><path d="M9.2 9.2l5.6 5.6M14.8 9.2l-5.6 5.6"/></symbol>
+  <symbol id="i-shield-q" viewBox="0 0 24 24"><path d="M12 2.6l7.6 2.8v6.1c0 4.6-3.1 8.1-7.6 10-4.5-1.9-7.6-5.4-7.6-10V5.4z"/><path d="M12 15.2v.1M9.9 9.6a2.2 2.2 0 114 1c-.7.6-1.9 1-1.9 2.3"/></symbol>
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="M3.5 11.2L12 4l8.5 7.2M5.5 9.8V20h13V9.8M10 20v-5.5h4V20"/></symbol>
+  <symbol id="i-scan" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5M8.2 11h1.6l1-2 1.4 4 1-2h1"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10.5" width="14" height="9.5" rx="2.5"/><path d="M8.5 10.5V8a3.5 3.5 0 017 0v2.5M12 14.2v2.4"/></symbol>
+  <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 7h9M19 7h1M4 17h1M11 17h9"/><circle cx="16" cy="7" r="2.2"/><circle cx="8" cy="17" r="2.2"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M7.5 5l11 7-11 7z"/></symbol>
+  <symbol id="i-stop" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2.5"/></symbol>
+  <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3.5 7.5a2 2 0 012-2h4l2 2.2h7a2 2 0 012 2v7.8a2 2 0 01-2 2h-13a2 2 0 01-2-2z"/></symbol>
+  <symbol id="i-drive" viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="8.5" rx="2.2"/><path d="M7 12.2h5"/><circle cx="17" cy="12.2" r=".6"/></symbol>
+  <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 11a8 8 0 10-2.2 5.8M20 4.8V11h-6.2"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3.6l9.4 16.2H2.6z"/><path d="M12 10v4.4M12 17.3v.1"/></symbol>
+  <symbol id="i-undo" viewBox="0 0 24 24"><path d="M9 14L4 9l5-5M4 9h10a6 6 0 010 12h-3"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4.5 7h15M10 7V4.5h4V7M6.8 7l1 13h8.4l1-13M10.2 11v5.5M13.8 11v5.5"/></symbol>
+  <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="7.5"/><circle cx="12" cy="12" r="2.6"/><path d="M12 2.5v4M12 17.5v4M2.5 12h4M17.5 12h4"/></symbol>
+  <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 010 18M12 3a14 14 0 000 18"/></symbol>
+  <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13.2 2.8L5 13.5h6l-1.2 7.7L18.8 10h-6z"/></symbol>
+  <symbol id="i-layers" viewBox="0 0 24 24"><path d="M12 3l9 5-9 5-9-5zM3 12.6l9 5 9-5M3 16.8l9 5 9-5"/></symbol>
+  <symbol id="i-pulse" viewBox="0 0 24 24"><path d="M3 12h4l2.5-6 4.2 12 2.3-6H21"/></symbol>
+  <symbol id="i-wall" viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="2"/><path d="M3.5 9.5h17M3.5 14.5h17M9 4.5v5M15 9.5v5M9 14.5v5"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5.2l3.2 2"/></symbol>
+  <symbol id="i-key" viewBox="0 0 24 24"><circle cx="8" cy="12" r="3.8"/><path d="M11.8 12H21M17.5 12v3.2M20.5 12v2.4"/></symbol>
+  <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="2.8"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.2M12 7.8v.1"/></symbol>
+</svg>
+
+<div class="bg"><i class="b1"></i><i class="b2"></i><i class="b3"></i></div>
+
+<div class="app">
+  <aside class="side glass">
+    <div class="brand">
+      <svg class="logo" viewBox="0 0 24 24" fill="none" stroke="url(#lg)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-shield"/></svg>
+      <div><b>Mini AV</b><small data-i18n="tagline"></small></div>
+    </div>
+    <button class="nav on" data-page="home"><svg class="ic"><use href="#i-home"/></svg><span data-i18n="nav_home"></span></button>
+    <button class="nav" data-page="scan"><svg class="ic"><use href="#i-scan"/></svg><span data-i18n="nav_scan"></span><em class="badge" id="navBadge" hidden>0</em></button>
+    <button class="nav" data-page="quarantine"><svg class="ic"><use href="#i-lock"/></svg><span data-i18n="nav_quarantine"></span></button>
+    <button class="nav" data-page="settings"><svg class="ic"><use href="#i-sliders"/></svg><span data-i18n="nav_settings"></span></button>
+    <div class="grow"></div>
+    <div class="sidefoot">
+      <span class="chip" id="adminChip"><svg class="ic sm"><use href="#i-key"/></svg><span id="adminChipTx"></span></span>
+      <div class="seg" role="group" aria-label="Language">
+        <button data-lang="fa">فارسی</button><button data-lang="en">English</button>
+      </div>
+    </div>
+  </aside>
+
+  <main>
+    <!-- HOME -->
+    <section class="page on" id="p-home">
+      <div class="glass hero ok" id="hero">
+        <div class="ring">
+          <svg class="r" viewBox="0 0 150 150" aria-hidden="true">
+            <defs><linearGradient id="rg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="var(--c1)"/><stop offset="1" stop-color="var(--c2)"/></linearGradient></defs>
+            <circle cx="75" cy="75" r="66" fill="none" stroke="rgba(255,255,255,.09)" stroke-width="9"/>
+            <circle cx="75" cy="75" r="66" fill="none" stroke="url(#rg)" stroke-width="9" stroke-linecap="round" stroke-dasharray="415" stroke-dashoffset="0"/>
+          </svg>
+          <div class="shield"><svg class="ic" id="heroIcon"><use href="#i-shield"/></svg></div>
+        </div>
+        <div>
+          <h1 id="heroTitle"></h1>
+          <p class="sub" id="heroSub" style="margin:6px 0 0"></p>
+          <div class="acts">
+            <button class="btn primary" id="hQuick"><svg class="ic"><use href="#i-bolt"/></svg><span data-i18n="mode_quick"></span></button>
+            <button class="btn" id="hFull"><svg class="ic"><use href="#i-layers"/></svg><span data-i18n="mode_full"></span></button>
+            <button class="btn" id="hCustom"><svg class="ic"><use href="#i-target"/></svg><span data-i18n="mode_custom"></span></button>
+          </div>
+        </div>
+      </div>
+      <div class="grid g4 mt" id="homeCards"></div>
+    </section>
+
+    <!-- SCAN -->
+    <section class="page" id="p-scan">
+      <h1 data-i18n="nav_scan"></h1>
+      <p class="sub" data-i18n="scan_sub"></p>
+      <div class="glass card">
+        <div class="modes" id="modes" role="radiogroup"></div>
+        <div class="opts">
+          <label class="sw"><input type="checkbox" id="optDef"><i></i><span data-i18n="opt_defender"></span></label>
+          <span class="grow"></span>
+          <button class="btn primary" id="btnStart"><svg class="ic"><use href="#i-play"/></svg><span data-i18n="start"></span></button>
+          <button class="btn danger" id="btnStop" hidden><svg class="ic"><use href="#i-stop"/></svg><span data-i18n="stop"></span></button>
+        </div>
+        <div class="custom" id="customBox" hidden>
+          <div class="addrow">
+            <input id="pathIn" type="text" spellcheck="false" data-i18n-ph="path_ph">
+            <button class="btn" id="btnAdd"><svg class="ic"><use href="#i-plus"/></svg><span data-i18n="add"></span></button>
+            <button class="btn" id="btnBrowse"><svg class="ic"><use href="#i-folder"/></svg><span data-i18n="browse"></span></button>
+          </div>
+          <div class="tags" id="drives"></div>
+          <div class="tags" id="paths"></div>
+        </div>
+        <div class="prog" id="prog">
+          <div class="phases" id="phases"></div>
+          <div class="bar" id="bar"><i></i></div>
+          <div class="meta" id="progTx" style="margin-top:8px"></div>
+          <div class="cur" id="curTx"></div>
+        </div>
+      </div>
+      <div class="glass card mt" id="results" hidden>
+        <h2 data-i18n="results"></h2>
+        <div id="resBody"></div>
+      </div>
+    </section>
+
+    <!-- QUARANTINE -->
+    <section class="page" id="p-quarantine">
+      <div class="qhead">
+        <div style="flex:1;min-width:240px">
+          <h1 data-i18n="nav_quarantine"></h1>
+          <p class="sub" style="margin:0" data-i18n="q_sub"></p>
+        </div>
+        <button class="btn danger" id="btnKill"><svg class="ic"><use href="#i-target"/></svg><span data-i18n="kill_all"></span></button>
+      </div>
+      <div class="glass card mt" id="qBody"></div>
+    </section>
+
+    <!-- SETTINGS -->
+    <section class="page" id="p-settings">
+      <h1 data-i18n="nav_settings"></h1>
+      <p class="sub" data-i18n="set_sub"></p>
+      <div class="glass card" id="setBody"></div>
+      <div class="glass card mt">
+        <h2 data-i18n="about"></h2>
+        <p class="sub" style="margin:0" data-i18n="about_tx"></p>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div class="veil" id="vAdmin"><div class="glass modal" role="dialog" aria-modal="true">
+  <h2><svg class="ic lg" style="color:var(--warn)"><use href="#i-key"/></svg><span data-i18n="admin_title"></span></h2>
+  <p data-i18n="admin_body"></p>
+  <div class="err" id="adminErr" hidden></div>
+  <div class="row">
+    <button class="btn ghost" id="adminSkip" data-i18n="admin_skip"></button>
+    <button class="btn" id="adminCancel" data-i18n="cancel"></button>
+    <button class="btn primary" id="adminAllow" data-i18n="admin_allow"></button>
+  </div>
+</div></div>
+
+<div class="veil" id="vKill"><div class="glass modal" role="dialog" aria-modal="true">
+  <h2><svg class="ic lg" style="color:var(--bad)"><use href="#i-alert"/></svg><span data-i18n="kill_title"></span></h2>
+  <p data-i18n="kill_body"></p>
+  <div class="row">
+    <button class="btn" id="killCancel" data-i18n="cancel"></button>
+    <button class="btn danger" id="killGo" data-i18n="kill_go"></button>
+  </div>
+</div></div>
+
+<div id="toasts" aria-live="polite"></div>
+
+<script>
+"use strict";
+/* ───────────── translations ───────────── */
+const T = {
+en: {
+  tagline:"Light and fast antivirus", nav_home:"Home", nav_scan:"Scan", nav_quarantine:"Quarantine", nav_settings:"Settings",
+  admin_on:"Administrator", admin_off:"Standard user",
+  home_t_ok:"Your computer is protected", home_s_ok:"No unresolved threats. Protection and definitions are up to date.",
+  home_t_bad:"Threats need your attention", home_s_bad:"{n} unresolved threat(s) from the last scan.",
+  home_t_warn:"Attention needed", home_s_rt:"Real-time protection is turned off.", home_s_old:"Virus definitions are out of date.",
+  home_t_unk:"Checking protection status", home_s_unk:"Reading the state of Microsoft Defender...",
+  home_t_na:"Protection status unavailable", home_s_na:"Microsoft Defender could not be reached. You can still scan.",
+  card_rt:"Real-time protection", card_sig:"Virus definitions", card_fw:"Firewall", card_q:"Quarantine", card_last:"Last scan", card_admin:"Permissions",
+  on:"On", off:"Off", unknown:"Unknown", never:"Never", today:"Updated today", days_old:"{n} day(s) old", items:"{n} item(s)",
+  last_sum:"{h} threats, {m} suspicious", fw_all:"All profiles on", fw_some:"Some profiles off",
+  btn_update:"Update definitions", btn_rt:"Turn on", updating:"Updating...", updated:"Definitions updated", failed:"Failed",
+  scan_sub:"Choose a scan type. Mini AV checks files itself and can also ask Microsoft Defender to scan.",
+  mode_quick:"Quick scan", mode_full:"Full scan", mode_custom:"Custom scan",
+  mode_quick_d:"Desktop, Downloads, Documents, startup items, temp folders and external drives",
+  mode_full_d:"Every file on every drive. This can take a long time",
+  mode_custom_d:"Only the folders and drives you choose",
+  opt_defender:"Also scan with Microsoft Defender", start:"Start scan", stop:"Stop",
+  path_ph:"Type a folder or drive path, for example D:\\", add:"Add", browse:"Browse", need_path:"Add at least one folder or drive first",
+  removable:"Removable", drive_fixed:"Local disk",
+  phase_files:"Files", phase_startup:"Startup items", phase_hosts:"Hosts file", phase_system:"System settings", phase_defender:"Microsoft Defender",
+  scanned:"{n} items checked", scanning:"Scanning...", stopping:"Stopping...",
+  results:"Detections", none:"No threats found", none_sub:"Everything that was checked looks clean.",
+  sev_high:"Threat", sev_medium:"Suspicious", sev_info:"Recovered data",
+  kind_eicar:"Standard antivirus test file (harmless)", kind_hash:"Matches a known malware signature",
+  kind_disguised:"A program disguised as a document or picture", kind_double_ext:"Double extension used to hide a program",
+  kind_autorun:"autorun.inf that starts a program (autorun worm)", kind_shortcut:"Fake shortcut (shortcut virus)",
+  kind_dropper:"Suspicious launcher or script", kind_recycler:"Program hidden in a RECYCLER folder",
+  kind_script:"Script with suspicious commands", kind_hidden_exe:"Hidden system program",
+  kind_startup_file:"Item in a Startup folder", kind_startup_reg:"Suspicious startup entry in the registry",
+  kind_hosts:"Hosts file blocks security or update websites", kind_defender:"Detected by Microsoft Defender",
+  kind_hidden_data:"Hidden by a shortcut virus, can be made visible again",
+  kind_task:"Scheduled task that runs a suspicious command", kind_winlogon:"Windows sign-in settings were changed",
+  kind_ifeo:"A debugger is attached to a program (hijack trick)", kind_defexcl:"Microsoft Defender is told to ignore a very wide location",
+  act_manual:"Review manually", confirmed:"Confirmed by Microsoft Defender", done_trusted:"{n} validly signed item(s) were skipped as trusted",
+  act_q:"Quarantine", act_ignore:"Ignore", act_unhide:"Make visible", act_qsel:"Quarantine selected ({n})", sel_all:"Select all", sel_none:"Select none",
+  st_quarantined:"Quarantined", st_deleted:"Deleted", st_fixed:"Fixed", st_restored:"Made visible", st_ignored:"Ignored",
+  st_failed:"Failed", st_handled:"Removed by Defender", st_protected:"Protected system path",
+  done_found:"Scan finished: {h} threat(s), {m} suspicious", done_clean:"Scan finished: no threats found", done_stop:"Scan stopped", done_auto:"{n} threat(s) were quarantined automatically",
+  q_sub:"Isolated files cannot run or harm your computer. Restore only items you trust.",
+  kill_all:"Kill all viruses", kill_title:"Destroy all viruses?",
+  kill_body:"Every quarantined item and every confirmed threat from the last scan will be permanently deleted. Suspicious (yellow) items and system settings are never touched. A Windows restore point is created first when possible.", kill_rp:"A restore point was created first",
+  kill_go:"Destroy", kill_done:"Destroyed {n} item(s)", kill_fail:"{n} item(s) could not be removed", kill_none:"Nothing to destroy",
+  q_empty:"Quarantine is empty", q_empty_sub:"Detected threats will appear here.",
+  restore:"Restore", del:"Delete permanently", restored_to:"Restored", deleted_ok:"Deleted",
+  cancel:"Cancel",
+  set_sub:"Behaviour of the program and Microsoft Defender helpers.",
+  set_lang:"Language", set_lang_d:"The interface switches instantly.",
+  set_autoq:"Quarantine confirmed threats automatically", set_autoq_d:"After a scan, items marked Threat are moved to quarantine. Suspicious items are always left for you.",
+  set_def:"Use Microsoft Defender in scans by default", set_def_d:"Mini AV asks Defender to scan too, and uses it for tasks it does not handle itself.",
+  set_admin:"Administrator permission", set_admin_d:"Needed for a full Defender scan and for cleaning protected locations.",
+  admin_yes:"Granted", admin_no:"Not granted", admin_ask:"Ask Windows",
+  set_def_tools:"Microsoft Defender", set_def_tools_d:"Update virus definitions or turn on real-time protection.",
+  set_trust:"Trust digitally signed programs", set_trust_d:"Windows itself checks the digital signature of flagged files. Validly signed files from trusted publishers are never reported.",
+  set_second:"Ask Microsoft Defender for a second opinion", set_second_d:"Suspicious items are checked by Defender. If it also detects them, they become confirmed threats.",
+  set_rules:"Heuristics file", set_rules_d:"heuristics.txt holds the detection rules. {n} rules, version {v}. You can extend it next to the program; mistakes are ignored safely.", rules_custom:"customised",
+  set_sigs:"Custom signatures", set_sigs_d:"Put SHA-256 hashes in signatures.txt next to the program, one per line, optionally followed by a name. {n} loaded.",
+  set_excl:"Ignored items", set_excl_none:"Nothing is ignored.", remove:"Remove",
+  about:"About", about_tx:"Mini AV 3.0 is a small free antivirus. It combines its own checks (fake shortcut and autorun viruses, disguised programs, double extensions, suspicious startup items, scheduled tasks, sign-in and Defender settings, known hashes) with Microsoft Defender and Windows digital-signature checks. It only changes files that were detected, never system settings, and everything it removes goes to quarantine first. Every action is written to %APPDATA%\\MiniAV\\actions.log.",
+  admin_title:"Administrator permission needed", admin_body:"To scan with Microsoft Defender and clean protected locations, Mini AV needs administrator permission. Windows will show its own confirmation window.",
+  admin_allow:"Allow", admin_skip:"Continue without it",
+  perm_denied:"Permission was not granted"
+},
+fa: {
+  tagline:"آنتی‌ویروس سبک و سریع", nav_home:"خانه", nav_scan:"اسکن", nav_quarantine:"قرنطینه", nav_settings:"تنظیمات",
+  admin_on:"مدیر سیستم", admin_off:"کاربر عادی",
+  home_t_ok:"رایانه شما محافظت می‌شود", home_s_ok:"تهدید حل‌نشده‌ای وجود ندارد. محافظت و تعاریف ویروس به‌روز هستند.",
+  home_t_bad:"تهدیدها نیاز به توجه شما دارند", home_s_bad:"{n} تهدید حل‌نشده از آخرین اسکن.",
+  home_t_warn:"نیاز به توجه", home_s_rt:"محافظت لحظه‌ای خاموش است.", home_s_old:"تعاریف ویروس قدیمی است.",
+  home_t_unk:"در حال بررسی وضعیت محافظت", home_s_unk:"در حال خواندن وضعیت ویندوز دیفندر...",
+  home_t_na:"وضعیت محافظت در دسترس نیست", home_s_na:"به ویندوز دیفندر دسترسی پیدا نشد. همچنان می‌توانید اسکن کنید.",
+  card_rt:"محافظت لحظه‌ای", card_sig:"تعاریف ویروس", card_fw:"فایروال", card_q:"قرنطینه", card_last:"آخرین اسکن", card_admin:"سطح دسترسی",
+  on:"روشن", off:"خاموش", unknown:"نامشخص", never:"هرگز", today:"امروز به‌روز شده", days_old:"{n} روز قدیمی", items:"{n} مورد",
+  last_sum:"{h} تهدید، {m} مشکوک", fw_all:"همه پروفایل‌ها روشن", fw_some:"بعضی پروفایل‌ها خاموش",
+  btn_update:"به‌روزرسانی تعاریف", btn_rt:"روشن کردن", updating:"در حال به‌روزرسانی...", updated:"تعاریف به‌روز شد", failed:"ناموفق",
+  scan_sub:"نوع اسکن را انتخاب کنید. مینی‌AV خودش فایل‌ها را بررسی می‌کند و می‌تواند از ویندوز دیفندر هم کمک بگیرد.",
+  mode_quick:"اسکن سریع", mode_full:"اسکن کامل", mode_custom:"اسکن سفارشی",
+  mode_quick_d:"دسکتاپ، دانلودها، اسناد، برنامه‌های شروع خودکار، پوشه‌های موقت و درایوهای خارجی",
+  mode_full_d:"همه فایل‌های همه درایوها. ممکن است زمان زیادی ببرد",
+  mode_custom_d:"فقط پوشه‌ها و درایوهایی که شما انتخاب می‌کنید",
+  opt_defender:"اسکن همزمان با ویندوز دیفندر", start:"شروع اسکن", stop:"توقف",
+  path_ph:"مسیر پوشه یا درایو را بنویسید، مثلاً D:\\", add:"افزودن", browse:"انتخاب پوشه", need_path:"اول یک پوشه یا درایو اضافه کنید",
+  removable:"قابل حمل", drive_fixed:"دیسک محلی",
+  phase_files:"فایل‌ها", phase_startup:"شروع خودکار", phase_hosts:"فایل hosts", phase_system:"تنظیمات سیستم", phase_defender:"ویندوز دیفندر",
+  scanned:"{n} مورد بررسی شد", scanning:"در حال اسکن...", stopping:"در حال توقف...",
+  results:"موارد شناسایی‌شده", none:"تهدیدی پیدا نشد", none_sub:"همه موارد بررسی‌شده سالم به نظر می‌رسند.",
+  sev_high:"تهدید", sev_medium:"مشکوک", sev_info:"داده بازیابی‌شده",
+  kind_eicar:"فایل آزمایشی استاندارد آنتی‌ویروس (بی‌خطر)", kind_hash:"با امضای یک بدافزار شناخته‌شده مطابقت دارد",
+  kind_disguised:"برنامه‌ای که خود را به شکل سند یا تصویر درآورده", kind_double_ext:"پسوند دوگانه برای پنهان کردن یک برنامه",
+  kind_autorun:"فایل autorun.inf که برنامه‌ای را اجرا می‌کند (کرم اتوران)", kind_shortcut:"میانبر جعلی (ویروس شورتکات)",
+  kind_dropper:"راه‌انداز یا اسکریپت مشکوک", kind_recycler:"برنامه پنهان در پوشه RECYCLER",
+  kind_script:"اسکریپت با دستورهای مشکوک", kind_hidden_exe:"برنامه سیستمی مخفی",
+  kind_startup_file:"آیتم در پوشه Startup", kind_startup_reg:"ورودی مشکوک شروع خودکار در رجیستری",
+  kind_hosts:"فایل hosts سایت‌های امنیتی یا به‌روزرسانی را مسدود کرده", kind_defender:"شناسایی‌شده توسط ویندوز دیفندر",
+  kind_hidden_data:"توسط ویروس شورتکات مخفی شده و قابل نمایش دوباره است",
+  kind_task:"تسک زمان‌بندی‌شده‌ای که دستور مشکوکی اجرا می‌کند", kind_winlogon:"تنظیمات ورود به ویندوز تغییر کرده است",
+  kind_ifeo:"یک دیباگر به برنامه‌ای وصل شده (ترفند ربودن برنامه)", kind_defexcl:"ویندوز دیفندر مجبور شده مسیر بسیار گسترده‌ای را نادیده بگیرد",
+  act_manual:"بررسی دستی", confirmed:"تأییدشده توسط ویندوز دیفندر", done_trusted:"{n} مورد دارای امضای معتبر به‌عنوان قابل‌اعتماد کنار گذاشته شد",
+  act_q:"قرنطینه", act_ignore:"نادیده گرفتن", act_unhide:"قابل مشاهده کردن", act_qsel:"قرنطینه موارد انتخاب‌شده ({n})", sel_all:"انتخاب همه", sel_none:"لغو انتخاب",
+  st_quarantined:"قرنطینه شد", st_deleted:"حذف شد", st_fixed:"اصلاح شد", st_restored:"قابل مشاهده شد", st_ignored:"نادیده گرفته شد",
+  st_failed:"ناموفق", st_handled:"توسط دیفندر حذف شد", st_protected:"مسیر محافظت‌شده سیستم",
+  done_found:"اسکن تمام شد: {h} تهدید، {m} مشکوک", done_clean:"اسکن تمام شد: تهدیدی پیدا نشد", done_stop:"اسکن متوقف شد", done_auto:"{n} تهدید به‌صورت خودکار قرنطینه شد",
+  q_sub:"فایل‌های ایزوله‌شده نمی‌توانند اجرا شوند یا به رایانه آسیب بزنند. فقط مواردی را که به آن‌ها اعتماد دارید بازیابی کنید.",
+  kill_all:"نابود کردن همه ویروس‌ها", kill_title:"همه ویروس‌ها نابود شوند؟",
+  kill_body:"همه موارد قرنطینه و تمام تهدیدهای قطعی آخرین اسکن برای همیشه حذف می‌شوند. موارد مشکوک (زرد) و تنظیمات سیستم هیچ‌وقت دست‌کاری نمی‌شوند. در صورت امکان، اول یک نقطه بازیابی ویندوز ساخته می‌شود.", kill_rp:"اول یک نقطه بازیابی ساخته شد",
+  kill_go:"نابود کن", kill_done:"{n} مورد نابود شد", kill_fail:"{n} مورد حذف نشد", kill_none:"چیزی برای نابود کردن نیست",
+  q_empty:"قرنطینه خالی است", q_empty_sub:"تهدیدهای شناسایی‌شده اینجا نمایش داده می‌شوند.",
+  restore:"بازیابی", del:"حذف دائمی", restored_to:"بازیابی شد", deleted_ok:"حذف شد",
+  cancel:"انصراف",
+  set_sub:"رفتار برنامه و کمک‌گرفتن از ویندوز دیفندر.",
+  set_lang:"زبان", set_lang_d:"رابط کاربری بلافاصله عوض می‌شود.",
+  set_autoq:"قرنطینه خودکار تهدیدهای قطعی", set_autoq_d:"بعد از اسکن، موارد «تهدید» به قرنطینه می‌روند. موارد مشکوک همیشه به تصمیم شما سپرده می‌شوند.",
+  set_def:"استفاده از ویندوز دیفندر در اسکن‌ها به‌صورت پیش‌فرض", set_def_d:"مینی‌AV از دیفندر هم می‌خواهد اسکن کند و برای کارهایی که خودش انجام نمی‌دهد از آن کمک می‌گیرد.",
+  set_admin:"مجوز مدیر سیستم", set_admin_d:"برای اسکن کامل دیفندر و پاک‌سازی بخش‌های محافظت‌شده لازم است.",
+  admin_yes:"داده شده", admin_no:"داده نشده", admin_ask:"درخواست از ویندوز",
+  set_def_tools:"ویندوز دیفندر", set_def_tools_d:"به‌روزرسانی تعاریف ویروس یا روشن کردن محافظت لحظه‌ای.",
+  set_trust:"اعتماد به برنامه‌های دارای امضای دیجیتال", set_trust_d:"خود ویندوز امضای دیجیتال فایل‌های علامت‌خورده را بررسی می‌کند. فایل‌های دارای امضای معتبر از ناشران معتبر هیچ‌وقت گزارش نمی‌شوند.",
+  set_second:"گرفتن نظر دوم از ویندوز دیفندر", set_second_d:"موارد مشکوک را دیفندر هم بررسی می‌کند. اگر آن‌ها را هم شناسایی کند، به تهدید تأییدشده تبدیل می‌شوند.",
+  set_rules:"فایل هیوریستیک", set_rules_d:"فایل heuristics.txt قوانین شناسایی را نگه می‌دارد. {n} قانون، نسخه {v}. می‌توانید کنار برنامه آن را گسترش دهید؛ اشتباه‌ها به‌صورت امن نادیده گرفته می‌شوند.", rules_custom:"سفارشی‌شده",
+  set_sigs:"امضاهای سفارشی", set_sigs_d:"هش‌های SHA-256 را هر کدام در یک خط (و در صورت تمایل یک نام بعد از آن) در فایل signatures.txt کنار برنامه بگذارید. {n} امضا بارگذاری شده.",
+  set_excl:"موارد نادیده‌گرفته‌شده", set_excl_none:"چیزی نادیده گرفته نشده است.", remove:"حذف",
+  about:"درباره برنامه", about_tx:"مینی‌AV نسخه ۳ یک آنتی‌ویروس کوچک و رایگان است. بررسی‌های خودش (ویروس شورتکات و اتوران، برنامه‌های مبدل، پسوند دوگانه، آیتم‌های مشکوک شروع خودکار، تسک‌های زمان‌بندی‌شده، تنظیمات ورود و دیفندر، هش‌های شناخته‌شده) را با ویندوز دیفندر و بررسی امضای دیجیتال ویندوز ترکیب می‌کند. فقط روی فایل‌های شناسایی‌شده کار می‌کند، هیچ‌وقت تنظیمات سیستم را تغییر نمی‌دهد و هر چه را پاک کند اول به قرنطینه می‌فرستد. همه کارها در %APPDATA%\\MiniAV\\actions.log ثبت می‌شود.",
+  admin_title:"مجوز مدیر سیستم لازم است", admin_body:"برای اسکن با ویندوز دیفندر و پاک‌سازی بخش‌های محافظت‌شده، مینی‌AV به مجوز مدیر سیستم نیاز دارد. ویندوز پنجره تأیید خودش را نشان می‌دهد.",
+  admin_allow:"اجازه دادن", admin_skip:"ادامه بدون مجوز",
+  perm_denied:"مجوز داده نشد"
+}};
+
+/* ───────────── helpers ───────────── */
+const NS = "http://www.w3.org/2000/svg";
+let lang = "fa";
+const t = (k, v) => { let s = (T[lang] && T[lang][k]) ?? T.en[k] ?? k; if (v) for (const x in v) s = s.replace("{" + x + "}", v[x]); return s; };
+const nf = n => new Intl.NumberFormat(lang === "fa" ? "fa-IR" : "en-US").format(n);
+const $ = s => document.querySelector(s);
+const send = (cmd, ...a) => { try { window.ipc.postMessage([cmd, ...a].join("\t")); } catch (e) { console.warn("ipc unavailable", cmd); } };
+function h(tag, props, ...kids) {
+  const e = document.createElement(tag);
+  for (const k in props || {}) {
+    const v = props[k];
+    if (v === false || v == null) continue;
+    if (k === "class") e.className = v;
+    else if (k.startsWith("on")) e.addEventListener(k.slice(2), v);
+    else if (k === "checked" || k === "disabled" || k === "hidden") e[k] = !!v;
+    else e.setAttribute(k, v);
+  }
+  for (const c of kids.flat(2)) { if (c == null || c === false) continue; e.append(c.nodeType ? c : document.createTextNode(String(c))); }
+  return e;
+}
+function ic(name, cls) { const s = document.createElementNS(NS, "svg"); s.setAttribute("class", "ic " + (cls || "")); const u = document.createElementNS(NS, "use"); u.setAttribute("href", "#i-" + name); s.append(u); return s; }
+function fmtTime(sec) { return new Date(sec * 1000).toLocaleString(lang === "fa" ? "fa-IR" : "en-US", { dateStyle: "medium", timeStyle: "short" }); }
+function fmtSize(b) { if (!b) return ""; const u = ["B", "KB", "MB", "GB"]; let i = 0; while (b >= 1024 && i < 3) { b /= 1024; i++; } return nf(+b.toFixed(i ? 1 : 0)) + " " + u[i]; }
+function toast(msg, cls) { const e = h("div", { class: "toast " + (cls || "") }, msg); $("#toasts").append(e); setTimeout(() => e.remove(), 3800); }
+const modal = (id, on) => $(id).classList.toggle("on", on);
+
+/* ───────────── state ───────────── */
+const S = {
+  page: "home", mode: "quick", defender: true, autoq: true, admin: false, adminSkipped: false,
+  scanning: false, stopping: false, phase: "", phasesDone: [], scanned: 0, current: "",
+  threats: [], paths: [], drives: [], q: [], info: null, last: null, sigs: 1, excl: [], summary: null, busy: {}, trust: true, second: true, rules: null
+};
+
+/* ───────────── language / pages ───────────── */
+function applyLang() {
+  document.documentElement.lang = lang; document.documentElement.dir = lang === "fa" ? "rtl" : "ltr";
+  document.querySelectorAll("[data-i18n]").forEach(e => e.textContent = t(e.dataset.i18n));
+  document.querySelectorAll("[data-i18n-ph]").forEach(e => e.placeholder = t(e.dataset.i18nPh));
+  document.querySelectorAll(".seg button").forEach(b => b.classList.toggle("on", b.dataset.lang === lang));
+  renderAll();
+}
+function go(p) {
+  S.page = p;
+  document.querySelectorAll(".page").forEach(e => e.classList.toggle("on", e.id === "p-" + p));
+  document.querySelectorAll(".nav").forEach(e => e.classList.toggle("on", e.dataset.page === p));
+  if (p === "quarantine") send("qlist");
+  if (p === "settings") send("settings_info");
+  if (p === "home") send("dstatus");
+  renderAll();
+}
+let raf = 0;
+function renderAll() {
+  cancelAnimationFrame(raf);
+  raf = requestAnimationFrame(() => {
+    renderSide();
+    ({ home: renderHome, scan: () => { renderScan(); renderResults(); }, quarantine: renderQ, settings: renderSettings })[S.page]();
+  });
+}
+
+function renderSide() {
+  $("#adminChip").className = "chip " + (S.admin ? "ok" : "warn");
+  $("#adminChipTx").textContent = t(S.admin ? "admin_on" : "admin_off");
+  const n = S.threats.filter(x => x.sev === "high" && x.state === "found" && !x.handled).length;
+  const b = $("#navBadge"); b.hidden = !n; b.textContent = nf(n);
+}
+
+/* ───────────── home ───────────── */
+function homeState() {
+  const unresolved = S.threats.filter(x => x.sev === "high" && x.state === "found" && !x.handled).length;
+  const i = S.info;
+  if (unresolved) return { cls: "bad", icon: "shield-x", title: t("home_t_bad"), sub: t("home_s_bad", { n: nf(unresolved) }) };
+  if (!i) return { cls: "unk", icon: "shield-q", title: t("home_t_unk"), sub: t("home_s_unk") };
+  if (!i.rt) return { cls: "unk", icon: "shield-q", title: t("home_t_na"), sub: t("home_s_na") };
+  if (i.rt === "False") return { cls: "warn", icon: "alert", title: t("home_t_warn"), sub: t("home_s_rt") };
+  if (+i.age > 7) return { cls: "warn", icon: "alert", title: t("home_t_warn"), sub: t("home_s_old") };
+  return { cls: "ok", icon: "shield", title: t("home_t_ok"), sub: t("home_s_ok") };
+}
+function stat(icon, cls, label, value, extra) {
+  return h("div", { class: "glass card stat" },
+    h("div", { class: "ico " + cls }, ic(icon)),
+    h("div", { style: "min-width:0" }, h("small", {}, label), h("b", {}, value), extra ? h("div", { style: "margin-top:8px" }, extra) : null));
+}
+function renderHome() {
+  const st = homeState();
+  $("#hero").className = "glass hero " + st.cls;
+  $("#heroTitle").textContent = st.title; $("#heroSub").textContent = st.sub;
+  $("#heroIcon").replaceChildren(Object.assign(document.createElementNS(NS, "use"), {})); $("#heroIcon").firstChild.setAttribute("href", "#i-" + st.icon);
+  const i = S.info || {};
+  const rtv = !S.info ? "..." : i.rt === "True" ? t("on") : i.rt === "False" ? t("off") : t("unknown");
+  const rtc = i.rt === "True" ? "ok" : i.rt === "False" ? "warn" : "unk";
+  const age = i.age === undefined || i.age === "" ? null : +i.age;
+  const sigv = age === null ? t("unknown") : age === 0 ? t("today") : t("days_old", { n: nf(age) });
+  const fws = Object.keys(i).filter(k => k.startsWith("fw_")).map(k => i[k]);
+  const fwv = !fws.length ? t("unknown") : fws.every(v => v === "True") ? t("fw_all") : t("fw_some");
+  const fwc = !fws.length ? "unk" : fws.every(v => v === "True") ? "ok" : "warn";
+  const upBtn = h("button", { class: "btn sm", disabled: S.busy.update, onclick: () => { S.busy.update = 1; toast(t("updating")); send("sigupdate"); renderAll(); } }, ic("refresh", "sm"), t("btn_update"));
+  const rtBtn = i.rt === "False" ? h("button", { class: "btn sm", onclick: () => send("rtenable") }, t("btn_rt")) : null;
+  const last = S.last ? fmtTime(S.last.time) : t("never");
+  $("#homeCards").replaceChildren(
+    stat("pulse", rtc, t("card_rt"), rtv, rtBtn),
+    stat("refresh", age !== null && age > 7 ? "warn" : age === null ? "unk" : "ok", t("card_sig"), sigv, upBtn),
+    stat("wall", fwc, t("card_fw"), fwv),
+    stat("lock", S.q.length ? "warn" : "ok", t("card_q"), t("items", { n: nf(S.q.length) })),
+    stat("clock", "unk", t("card_last"), last, S.last ? h("small", {}, t("last_sum", { h: nf(S.last.high), m: nf(S.last.medium) })) : null),
+    stat("key", S.admin ? "ok" : "warn", t("card_admin"), t(S.admin ? "admin_yes" : "admin_no"))
+  );
+}
+
+/* ───────────── scan ───────────── */
+const MODES = [["quick", "bolt"], ["full", "layers"], ["custom", "target"]];
+function renderScan() {
+  $("#modes").replaceChildren(...MODES.map(([m, icn]) => h("button", {
+    class: "mode" + (S.mode === m ? " on" : ""), role: "radio", "aria-checked": S.mode === m, disabled: S.scanning,
+    onclick: () => { S.mode = m; renderAll(); }
+  }, ic(icn, "lg"), h("b", {}, t("mode_" + m)), h("span", {}, t("mode_" + m + "_d")))));
+  $("#optDef").checked = S.defender; $("#optDef").disabled = S.scanning;
+  $("#customBox").hidden = S.mode !== "custom";
+  $("#btnStart").hidden = S.scanning; $("#btnStop").hidden = !S.scanning; $("#btnStop").disabled = S.stopping;
+  $("#btnStop").lastChild.textContent = t("stop");
+  $("#drives").replaceChildren(...S.drives.map(d => h("button", { class: "drv", disabled: S.scanning, onclick: () => addPath(d.root) },
+    ic("drive", "sm"), h("span", { dir: "ltr" }, d.root), h("small", {}, d.removable ? t("removable") : t("drive_fixed")))));
+  $("#paths").replaceChildren(...S.paths.map(p => h("span", { class: "tag" }, ic("folder", "sm"), h("span", { title: p }, p),
+    h("button", { "aria-label": t("remove"), onclick: () => { S.paths = S.paths.filter(x => x !== p); renderAll(); } }, ic("x", "sm")))));
+  renderProgress();
+}
+const PHASES = ["files", "startup", "hosts", "system", "defender"];
+function renderProgress() {
+  const on = S.scanning || S.summary;
+  $("#prog").classList.toggle("on", !!on);
+  if (!on) return;
+  $("#bar").classList.toggle("done", !S.scanning);
+  const list = PHASES.filter(p => p !== "defender" || S.defender || S.phase === "defender" || S.phasesDone.includes("defender"));
+  $("#phases").replaceChildren(...list.map(p => h("span", { class: "ph" + (S.scanning && S.phase === p ? " on" : S.phasesDone.includes(p) || !S.scanning ? " fin" : "") }, t("phase_" + p))));
+  let msg = S.scanning ? (S.stopping ? t("stopping") : t("scanning")) : "";
+  $("#progTx").textContent = (msg ? msg + "  " : "") + t("scanned", { n: nf(S.scanned) });
+  $("#curTx").textContent = S.scanning ? S.current : "";
+}
+function addPath(p) {
+  p = (p || "").trim().replace(/^"|"$/g, ""); if (!p) return;
+  if (!S.paths.includes(p)) S.paths.push(p); renderAll();
+}
+function startScan() {
+  if (S.mode === "custom" && !S.paths.length) { toast(t("need_path"), "bad"); return; }
+  S.threats = []; S.summary = null; S.scanned = 0; S.current = ""; S.phase = "files"; S.phasesDone = []; S.scanning = true; S.stopping = false;
+  send("scan", S.mode, S.defender ? 1 : 0, S.paths.join("\u0001"));
+  renderAll();
+}
+function actFor(ids, action) { if (ids.length) send("act", action, ids.join(",")); }
+
+function renderResults() {
+  const box = $("#results"), body = $("#resBody");
+  const show = S.scanning || S.summary || S.threats.length;
+  box.hidden = !show; if (!show) return;
+  if (!S.threats.length) {
+    body.replaceChildren(S.scanning ? h("div", { class: "empty", style: "padding:18px" }, h("span", {}, t("scanning"))) :
+      h("div", { class: "empty" }, ic("shield"), h("b", { style: "color:var(--text)" }, t("none")), h("span", {}, t("none_sub"))));
+    return;
+  }
+  const order = { high: 0, medium: 1, info: 2 };
+  const list = [...S.threats].sort((a, b) => order[a.sev] - order[b.sev]);
+  const open = list.filter(x => x.state === "found" && !x.handled && x.sev !== "info" && !x.manual);
+  const nsel = open.filter(x => x.sel).length;
+  const bulk = h("div", { class: "bulk" },
+    h("button", { class: "btn primary sm", disabled: !nsel || S.scanning, onclick: () => actFor(open.filter(x => x.sel).map(x => x.id), "quarantine") }, ic("lock", "sm"), t("act_qsel", { n: nf(nsel) })),
+    h("button", { class: "btn ghost sm", onclick: () => { const all = nsel !== open.length; open.forEach(x => x.sel = all); renderAll(); } }, nsel === open.length ? t("sel_none") : t("sel_all")),
+    h("span", { class: "grow" }),
+    h("span", { class: "meta" }, t("sev_high") + ": " + nf(list.filter(x => x.sev === "high").length) + "  |  " + t("sev_medium") + ": " + nf(list.filter(x => x.sev === "medium").length)));
+  body.replaceChildren(bulk, ...list.map(threatRow));
+}
+const DETAIL_KINDS = ["autorun", "startup_reg", "hosts", "hash", "task", "winlogon", "ifeo", "defexcl"];
+function threatRow(x) {
+  const resolved = x.state !== "found" || x.handled;
+  const stKey = x.handled && x.state === "found" ? "st_handled" : "st_" + x.state;
+  const stCls = x.state === "failed" ? "bad" : x.state === "ignored" ? "mut" : "ok";
+  const acts = h("div", { class: "acts" });
+  if (resolved) acts.append(h("span", { class: "st " + stCls }, t(stKey) + (x.msg && x.state === "failed" ? ": " + (x.msg === "protected" ? t("st_protected") : x.msg) : "")));
+  else if (x.manual) acts.append(h("span", { class: "st mut" }, t("act_manual")), h("button", { class: "btn sm ghost", onclick: () => actFor([x.id], "ignore") }, t("act_ignore")));
+  else if (x.sev === "info") acts.append(h("button", { class: "btn sm", onclick: () => actFor([x.id], "unhide") }, ic("eye", "sm"), t("act_unhide")));
+  else acts.append(
+    h("button", { class: "btn sm", disabled: S.scanning, onclick: () => actFor([x.id], "quarantine") }, ic("lock", "sm"), t("act_q")),
+    h("button", { class: "btn sm ghost", onclick: () => actFor([x.id], "ignore") }, t("act_ignore")));
+  return h("div", { class: "trow " + x.sev },
+    (!resolved && x.sev !== "info" && !x.manual) ? h("input", { class: "cb", type: "checkbox", checked: x.sel, "aria-label": x.name, onchange: e => { x.sel = e.target.checked; renderResults(); } }) : h("span", { style: "width:18px" }),
+    h("div", { style: "min-width:0" },
+      h("div", { class: "nm" }, h("span", { class: "pill " + x.sev }, t("sev_" + x.sev)), x.confirmed ? h("span", { class: "pill info" }, t("confirmed")) : null, h("span", { dir: "ltr" }, x.name)),
+      h("div", { class: "ds" }, t("kind_" + x.kind)),
+      h("div", { class: "path", title: x.target }, x.target),
+      DETAIL_KINDS.includes(x.kind) && x.detail ? h("div", { class: "path", style: "color:var(--dim)", title: x.detail }, x.detail) : null),
+    acts);
+}
+
+/* ───────────── quarantine ───────────── */
+function renderQ() {
+  $("#btnKill").disabled = false;
+  const body = $("#qBody");
+  if (!S.q.length) { body.replaceChildren(h("div", { class: "empty" }, ic("shield"), h("b", { style: "color:var(--text)" }, t("q_empty")), h("span", {}, t("q_empty_sub")))); return; }
+  body.replaceChildren(...S.q.map(q => h("div", { class: "qrow" },
+    h("div", { class: "qico" }, ic(q.remedy === "reg" ? "key" : "alert")),
+    h("div", { style: "min-width:0" },
+      h("div", { class: "nm", style: "font-weight:600" }, h("span", { dir: "ltr" }, q.name), " ", h("span", { class: "meta" }, t("kind_" + q.kind))),
+      h("div", { class: "path", title: q.orig }, q.orig),
+      h("div", { class: "meta" }, fmtTime(q.time) + (q.size ? "  |  " + fmtSize(q.size) : ""))),
+    h("div", { class: "acts", style: "display:flex;gap:8px;flex-wrap:wrap" },
+      h("button", { class: "btn sm", onclick: () => send("restore", q.id) }, ic("undo", "sm"), t("restore")),
+      h("button", { class: "btn sm", onclick: () => send("qdelete", q.id) }, ic("trash", "sm"), t("del"))))));
+}
+
+/* ───────────── settings ───────────── */
+function toggle(id, checked, onchange) { return h("label", { class: "sw" }, h("input", { type: "checkbox", id, checked, onchange: e => onchange(e.target.checked) }), h("i")); }
+function renderSettings() {
+  const row = (title, desc, ctl) => h("div", { class: "srow" }, h("div", { class: "tx" }, h("b", {}, title), h("small", {}, desc)), ctl);
+  $("#setBody").replaceChildren(
+    row(t("set_lang"), t("set_lang_d"), h("div", { class: "seg", style: "min-width:190px" },
+      h("button", { class: lang === "fa" ? "on" : "", onclick: () => setLang("fa") }, "فارسی"), h("button", { class: lang === "en" ? "on" : "", onclick: () => setLang("en") }, "English"))),
+    row(t("set_autoq"), t("set_autoq_d"), toggle("tAutoq", S.autoq, v => { S.autoq = v; send("setopt", "autoq", v ? 1 : 0); })),
+    row(t("set_def"), t("set_def_d"), toggle("tDef", S.defender, v => { S.defender = v; send("setopt", "defender", v ? 1 : 0); renderAll(); })),
+    row(t("set_trust"), t("set_trust_d"), toggle("tTrust", S.trust, v => { S.trust = v; send("setopt", "trust", v ? 1 : 0); })),
+    row(t("set_second"), t("set_second_d"), toggle("tSecond", S.second, v => { S.second = v; send("setopt", "second", v ? 1 : 0); })),
+    row(t("set_admin"), t("set_admin_d"), S.admin ? h("span", { class: "chip ok" }, ic("check", "sm"), t("admin_yes")) : h("button", { class: "btn", onclick: () => { $("#adminErr").hidden = true; modal("#vAdmin", true); } }, ic("key", "sm"), t("admin_ask"))),
+    row(t("set_def_tools"), t("set_def_tools_d"), h("div", { style: "display:flex;gap:8px;flex-wrap:wrap" },
+      h("button", { class: "btn", disabled: S.busy.update, onclick: () => { S.busy.update = 1; toast(t("updating")); send("sigupdate"); renderAll(); } }, ic("refresh", "sm"), t("btn_update")),
+      h("button", { class: "btn", onclick: () => send("rtenable") }, ic("pulse", "sm"), t("btn_rt") + " - " + t("card_rt")))),
+    row(t("set_rules"), t("set_rules_d", { n: nf(S.rules ? S.rules.count : 0), v: S.rules ? S.rules.version : "?" }), h("span", { class: "chip mono" }, "heuristics.txt" + (S.rules && S.rules.custom ? " (" + t("rules_custom") + ")" : ""))),
+    row(t("set_sigs"), t("set_sigs_d", { n: nf(S.sigs) }), h("span", { class: "chip mono" }, "signatures.txt")),
+    h("div", { class: "srow" }, h("div", { class: "tx" }, h("b", {}, t("set_excl")),
+      ...(S.excl.length ? S.excl.map(p => h("div", { style: "display:flex;gap:10px;align-items:center;margin-top:8px" }, h("span", { class: "path", style: "flex:1", title: p }, p),
+        h("button", { class: "btn sm", onclick: () => send("rmexcl", p) }, t("remove")))) : [h("small", {}, t("set_excl_none"))])))
+  );
+}
+function setLang(l) { lang = l; send("setopt", "lang", l); applyLang(); }
+
+/* ───────────── events from Rust ───────────── */
+const H = {
+  init(d) {
+    lang = d.lang === "en" ? "en" : "fa"; S.autoq = !!d.autoq; S.defender = !!d.defender; S.admin = !!d.admin; S.drives = d.drives || [];
+    S.last = d.last || null; S.sigs = d.sigs || 1; S.excl = d.excl || []; S.qcount = d.qcount || 0;
+    S.trust = d.trust !== false; S.second = d.second !== false; S.rules = d.rules || null;
+    applyLang(); send("dstatus"); send("qlist");
+  },
+  dstatus(d) { S.info = d || {}; renderAll(); },
+  phase(p) { if (S.phase && S.phase !== p) S.phasesDone.push(S.phase); S.phase = p; renderProgress(); },
+  progress(d) { S.scanned = d.n; S.current = d.cur; renderProgress(); },
+  found(d) { d.state = "found"; d.sel = d.sev === "high" && !d.handled && !d.manual; S.threats.push(d); renderAll(); },
+  status(d) { for (const x of S.threats) if (d.ids.includes(x.id)) { x.state = d.state; x.msg = d.msg || (d.msgs && d.msgs[x.id]) || ""; x.sel = false; } renderAll(); },
+  done(d) {
+    S.scanning = false; S.stopping = false; S.summary = d; S.scanned = d.scanned; S.phasesDone = PHASES.slice();
+    S.last = { time: d.time, high: d.high, medium: d.medium };
+    if (d.cancelled) toast(t("done_stop")); else if (d.high || d.medium) toast(t("done_found", { h: nf(d.high), m: nf(d.medium) }), d.high ? "bad" : ""); else toast(t("done_clean"), "ok");
+    if (d.auto) toast(t("done_auto", { n: nf(d.auto) }), "ok");
+    if (d.trusted) toast(t("done_trusted", { n: nf(d.trusted) }));
+    send("qlist"); renderAll();
+  },
+  qlist(a) { S.q = a; renderAll(); },
+  toast(d) { toast(d.msg, d.cls); S.busy = {}; renderAll(); },
+  tmsg(d) { toast(t(d.key, d.vars), d.cls); if (d.key === "updated" || d.key === "failed") { S.busy = {}; send("dstatus"); } renderAll(); },
+  folder(p) { addPath(p); },
+  excl(a) { S.excl = a; renderAll(); },
+  sigs(n) { S.sigs = n; renderAll(); },
+  rules(d) { S.rules = d; renderAll(); },
+  admin(d) { S.admin = !!d.admin; renderAll(); },
+  elevate(d) { if (!d.ok) { const e = $("#adminErr"); e.hidden = false; e.textContent = t("perm_denied") + (d.msg ? ": " + d.msg : ""); } },
+  killdone(d) {
+    modal("#vKill", false); $("#killGo").disabled = false;
+    if (d.rp) toast(t("kill_rp"), "ok");
+    if (!d.ok && !d.fail) toast(t("kill_none")); else { toast(t("kill_done", { n: nf(d.ok) }), "ok"); if (d.fail) toast(t("kill_fail", { n: nf(d.fail) }), "bad"); }
+    send("qlist");
+  }
+};
+window.AV = { on(name, d) { if (H[name]) H[name](d); } };
+
+/* ───────────── wiring ───────────── */
+document.querySelectorAll(".nav").forEach(b => b.addEventListener("click", () => go(b.dataset.page)));
+document.querySelectorAll(".seg button[data-lang]").forEach(b => b.addEventListener("click", () => setLang(b.dataset.lang)));
+$("#optDef").addEventListener("change", e => { S.defender = e.target.checked; send("setopt", "defender", S.defender ? 1 : 0); });
+$("#btnAdd").addEventListener("click", () => { addPath($("#pathIn").value); $("#pathIn").value = ""; });
+$("#pathIn").addEventListener("keydown", e => { if (e.key === "Enter") { addPath(e.target.value); e.target.value = ""; } });
+$("#btnBrowse").addEventListener("click", () => send("browse"));
+$("#btnStart").addEventListener("click", () => {
+  if (S.mode === "custom" && !S.paths.length) { toast(t("need_path"), "bad"); return; }
+  if (!S.admin && !S.adminSkipped) { $("#adminErr").hidden = true; modal("#vAdmin", true); return; }
+  startScan();
+});
+$("#btnStop").addEventListener("click", () => { S.stopping = true; send("stop"); renderAll(); });
+$("#adminAllow").addEventListener("click", () => send("elevate"));
+$("#adminCancel").addEventListener("click", () => modal("#vAdmin", false));
+$("#adminSkip").addEventListener("click", () => { S.adminSkipped = true; modal("#vAdmin", false); if (S.page === "scan") startScan(); });
+$("#btnKill").addEventListener("click", () => modal("#vKill", true));
+$("#killCancel").addEventListener("click", () => modal("#vKill", false));
+$("#killGo").addEventListener("click", () => { $("#killGo").disabled = true; send("killall"); });
+for (const [id, m] of [["#hQuick", "quick"], ["#hFull", "full"], ["#hCustom", "custom"]]) $(id).addEventListener("click", () => { S.mode = m; go("scan"); });
+document.addEventListener("keydown", e => { if (e.key === "Escape") { modal("#vAdmin", false); modal("#vKill", false); } });
+
+applyLang();
+send("init");
+</script>
+</body>
+</html>

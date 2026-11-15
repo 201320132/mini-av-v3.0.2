@@ -1,0 +1,6 @@
+# Custom malware signatures for Mini AV.
+# One SHA-256 hash per line, optionally followed by a name. Lines starting with # are ignored.
+# Keep this file next to mini-av.exe (or in %APPDATA%\MiniAV\signatures.txt).
+#
+# Example (this is the harmless EICAR test file, it is already built in):
+# 275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f EICAR-Test-File

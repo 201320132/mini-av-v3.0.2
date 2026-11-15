@@ -1,0 +1,17 @@
+[package]
+name = "mini-av"
+version = "3.2.0"
+edition = "2021"
+description = "Small, free antivirus front-end with its own scanner and Microsoft Defender integration"
+
+[dependencies]
+# Native window + the WebView2 control that ships with Windows 10/11.
+tao = "0.29"
+wry = "0.46"
+
+[profile.release]
+opt-level = "s"
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true

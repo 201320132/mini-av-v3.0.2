@@ -1,0 +1,4 @@
+# Link the C runtime statically so mini-av.exe does not need the "Visual C++ Redistributable"
+# (otherwise a clean Windows can fail with "VCRUNTIME140_1.dll was not found").
+[target.x86_64-pc-windows-msvc]
+rustflags = ["-C", "target-feature=+crt-static"]
